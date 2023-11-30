@@ -6,6 +6,7 @@ import com.monzo.webcrawler.web.WebParser;
 
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -24,7 +25,8 @@ public class CrawlerService {
     private final WebClient webClient;
     private final CountDownLatch countDownLatch;
 
-    public CrawlerService(String rootUrl, WebClient webClient) throws MalformedURLException {
+    public CrawlerService(String rootUrl, WebClient webClient) throws MalformedURLException, URISyntaxException {
+        URI url = parseAndValidateUrl(rootUrl);
         this.visitedLinks = new HashSet<>();
         this.totalUniqueLinks = new AtomicInteger();
         this.totalVisitedLinks = new AtomicInteger();
@@ -34,13 +36,12 @@ public class CrawlerService {
         ThreadFactory factory = Thread.ofVirtual().factory();
         this.executorService = Executors.newFixedThreadPool(CONCURRENCY_LEVEL, factory);
 
-        URI url = URI.create(rootUrl);
         this.domain = url.getHost();
 
         enqueue(url);
     }
 
-    public static CrawlerService create(String rootUrl) throws MalformedURLException {
+    public static CrawlerService create(String rootUrl) throws MalformedURLException, URISyntaxException {
         System.out.println("Creating CrawlerService");
         return new CrawlerService(rootUrl, WebClient.instance());
     }
@@ -94,5 +95,15 @@ public class CrawlerService {
             System.out.println("Total links in the page: " + parseResult.links().size());
         }
         System.out.println();
+    }
+
+    private URI parseAndValidateUrl(String strUrl) throws MalformedURLException, URISyntaxException {
+        try {
+            URI url = new URI(strUrl).normalize();
+            url.toURL();
+            return url;
+        } catch (Exception e) {
+            throw new MalformedURLException(e.getMessage());
+        }
     }
 }

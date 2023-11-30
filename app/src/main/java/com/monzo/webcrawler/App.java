@@ -1,21 +1,15 @@
 package com.monzo.webcrawler;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-
 import java.io.BufferedReader;
 import java.io.Console;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
-import java.net.URI;
-import java.util.List;
+import java.net.URISyntaxException;
 
 public class App {
 
     public static void main(String[] args) {
         new App().start();
-//        new App().test();
     }
 
     private void start() {
@@ -27,7 +21,8 @@ public class App {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
         while(true) {
-            System.out.println("Insert the initial url or type exit to stop:");
+            System.out.println();
+            System.out.println("START - Type the initial url (or exit to stop): ");
 
             String input = console.readLine();
 
@@ -43,10 +38,10 @@ public class App {
 
                 wait(crawlerService);
 
-                System.out.println("Task completed");
+                System.out.println("COMPLETED - Task completed!");
 
-            } catch (MalformedURLException e) {
-                throw new RuntimeException(e);
+            } catch (MalformedURLException | URISyntaxException e) {
+                System.err.println("ERROR - Invalid URL, please try again...");
             }
         }
     }
@@ -57,20 +52,6 @@ public class App {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             System.out.println("Thread Interrupted");
-        }
-    }
-
-    private void test() {
-        try {
-            Document doc = Jsoup.connect("https://monzo.com/").get();
-            List<URI> list = doc.select("a[href]")
-                    .eachAttr("abs:href")
-                    .stream()
-                    .map(URI::create)
-                    .toList();
-            System.out.println(list);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
 }
