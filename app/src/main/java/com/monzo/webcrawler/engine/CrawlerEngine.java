@@ -21,10 +21,10 @@ import static com.monzo.webcrawler.utils.Console.println;
 public class CrawlerEngine {
     private static final Logger log = LoggerFactory.getLogger(CrawlerEngine.class);
     private static final int CONCURRENCY_LEVEL = 20;
-    private final Set<String> visitedLinks;
+    private final Set<String> linkHistory;
     private final String domain;
-    private final AtomicInteger totalUniqueLinks;
-    private final AtomicInteger totalVisitedLinks;
+    private final AtomicInteger totalEnqueuedLinks;
+    private final AtomicInteger totalProcessedLinks;
     private final ExecutorService executorService;
     private final WebClient webClient;
     private final CountDownLatch countDownLatch;
@@ -33,9 +33,9 @@ public class CrawlerEngine {
         URI url = parseAndValidateUrl(rootUrl);
 
         this.domain = getDomainName(url);
-        this.visitedLinks = new HashSet<>();
-        this.totalUniqueLinks = new AtomicInteger();
-        this.totalVisitedLinks = new AtomicInteger();
+        this.linkHistory = new HashSet<>();
+        this.totalEnqueuedLinks = new AtomicInteger();
+        this.totalProcessedLinks = new AtomicInteger();
         this.countDownLatch = new CountDownLatch(1);
         this.webClient = webClient;
         this.executorService = executorService;
@@ -58,19 +58,18 @@ public class CrawlerEngine {
 
             if (parseResult.isSuccess()) {
                 parseResult.links().stream()
-                        .filter(l -> domain.equals(getDomainName(l)) && !visitedLinks.contains(l.toString()))
+                        .filter(l -> domain.equals(getDomainName(l)) && !linkHistory.contains(l.toString()))
                         .forEach(this::enqueue);
             }
         }
         finally {
-            totalVisitedLinks.incrementAndGet();
+            totalProcessedLinks.incrementAndGet();
 
-            println("Links found: %d -- Visited: %d", totalUniqueLinks.intValue(), totalVisitedLinks.intValue());
+            println("Enqueued Links: %d -- Processed Links: %d", totalEnqueuedLinks.intValue(), totalProcessedLinks.intValue());
             println();
 
             if(isTerminated()) {
                 countDownLatch.countDown();
-                this.notifyAll();
             }
         }
     }
@@ -81,13 +80,13 @@ public class CrawlerEngine {
         log.debug("process completed...");
     }
 
-    public boolean isTerminated() {
-        return totalUniqueLinks.intValue() == totalVisitedLinks.intValue();
+    private boolean isTerminated() {
+        return totalEnqueuedLinks.intValue() == totalProcessedLinks.intValue();
     }
 
     private void enqueue(URI url) {
-        visitedLinks.add(url.toString());
-        totalUniqueLinks.incrementAndGet();
+        linkHistory.add(url.toString());
+        totalEnqueuedLinks.incrementAndGet();
 
         executorService.submit(new WebParser(webClient, url, this));
         log.debug("Enqueued url {}", url);
