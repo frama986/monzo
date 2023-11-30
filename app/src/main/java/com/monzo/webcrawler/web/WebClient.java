@@ -17,19 +17,19 @@ public class WebClient {
 
     private final HttpClient client;
 
-    private WebClient() {
-        client = HttpClient.newBuilder()
+    WebClient() {
+        this(HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(30))
                 .followRedirects(HttpClient.Redirect.NORMAL)
-                .build();
+                .build());
+    }
+
+    WebClient(HttpClient httpClient) {
+        this.client = httpClient;
     }
 
     public static WebClient instance() {
         return WEB_CLIENT;
-    }
-
-    public String get(String url) throws WebClientException {
-        return get(URI.create(url));
     }
 
     public String get(URI url) throws WebClientException {
