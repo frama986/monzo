@@ -1,4 +1,4 @@
-package com.monzo.webcrawler;
+package com.monzo.webcrawler.engine;
 
 import com.monzo.webcrawler.models.ParseResult;
 import com.monzo.webcrawler.web.WebClient;
@@ -15,7 +15,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class CrawlerService {
+public class CrawlerEngine {
     private static final int CONCURRENCY_LEVEL = 20;
     private final Set<String> visitedLinks;
     private final String domain;
@@ -25,7 +25,7 @@ public class CrawlerService {
     private final WebClient webClient;
     private final CountDownLatch countDownLatch;
 
-    public CrawlerService(String rootUrl, WebClient webClient) throws MalformedURLException, URISyntaxException {
+    public CrawlerEngine(String rootUrl, WebClient webClient) throws MalformedURLException, URISyntaxException {
         URI url = parseAndValidateUrl(rootUrl);
         this.visitedLinks = new HashSet<>();
         this.totalUniqueLinks = new AtomicInteger();
@@ -41,9 +41,9 @@ public class CrawlerService {
         enqueue(url);
     }
 
-    public static CrawlerService create(String rootUrl) throws MalformedURLException, URISyntaxException {
+    public static CrawlerEngine create(String rootUrl) throws MalformedURLException, URISyntaxException {
         System.out.println("Creating CrawlerService");
-        return new CrawlerService(rootUrl, WebClient.instance());
+        return new CrawlerEngine(rootUrl, WebClient.instance());
     }
 
     synchronized public void processResult(ParseResult parseResult) {

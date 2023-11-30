@@ -1,6 +1,6 @@
 package com.monzo.webcrawler.web;
 
-import com.monzo.webcrawler.CrawlerService;
+import com.monzo.webcrawler.engine.CrawlerEngine;
 import com.monzo.webcrawler.models.ParseResult;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -12,12 +12,12 @@ public class WebParser implements Runnable {
 
     private final URI targetUrl;
     private final WebClient webClient;
-    private final CrawlerService crawlerService;
+    private final CrawlerEngine crawlerEngine;
 
-    public WebParser(WebClient webClient, URI targetUrl, CrawlerService crawlerService) {
+    public WebParser(WebClient webClient, URI targetUrl, CrawlerEngine crawlerEngine) {
         this.webClient = webClient;
         this.targetUrl = targetUrl;
-        this.crawlerService = crawlerService;
+        this.crawlerEngine = crawlerEngine;
     }
 
     @Override
@@ -52,11 +52,11 @@ public class WebParser implements Runnable {
 
     private void submitResult(List<URI> links) {
 //        System.out.println("Submitting");
-        crawlerService.processResult(new ParseResult(targetUrl, links));
+        crawlerEngine.processResult(new ParseResult(targetUrl, links));
     }
 
     private void handleErrors(Exception e) {
         System.out.println("Error " + e.getMessage());
-        crawlerService.processResult(new ParseResult(targetUrl, e.getMessage()));
+        crawlerEngine.processResult(new ParseResult(targetUrl, e.getMessage()));
     }
 }
