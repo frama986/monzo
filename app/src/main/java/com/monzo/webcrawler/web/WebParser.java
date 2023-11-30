@@ -1,7 +1,7 @@
 package com.monzo.webcrawler.web;
 
 import com.monzo.webcrawler.CrawlerService;
-import com.monzo.webcrawler.models.PageLinks;
+import com.monzo.webcrawler.models.ParseResult;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -22,23 +22,27 @@ public class WebParser implements Runnable {
 
     @Override
     public void run() {
+//        System.out.println("Parser is running");
         try {
             Document doc = fetch();
             List<URI> links = extractLinks(doc);
             submitResult(links);
-        } catch (WebClient.WebClientException e) {
-            throw new RuntimeException(e);
-            // TODO: return an error
+        } catch (Exception e) {
+            handleErrors(e);
         }
 
     }
 
     private Document fetch() throws WebClient.WebClientException {
+//        System.out.println("Fetching from " + targetUrl.toString());
         String response = webClient.get(targetUrl);
+//        System.out.println("Response " + response);
         return Jsoup.parse(response);
+//                    .connect(targetUrl.toString()).get();
     }
 
     private List<URI> extractLinks(Document doc) {
+//        System.out.println("Extracting");
         return doc.select("a[href]")
                 .eachAttr("abs:href")
                 .stream()
@@ -47,7 +51,12 @@ public class WebParser implements Runnable {
     }
 
     private void submitResult(List<URI> links) {
-        PageLinks pageLinks = new PageLinks(targetUrl, links);
-        crawlerService.processResult(pageLinks);
+//        System.out.println("Submitting");
+        crawlerService.processResult(new ParseResult(targetUrl, links));
+    }
+
+    private void handleErrors(Exception e) {
+        System.out.println("Error " + e.getMessage());
+        crawlerService.processResult(new ParseResult(targetUrl, e.getMessage()));
     }
 }

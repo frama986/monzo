@@ -8,6 +8,7 @@
 plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     id 'application'
+    id 'java'
 }
 
 repositories {
@@ -22,11 +23,12 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     // This dependency is used by the application.
-    implementation 'org.jsoup:jsoup:1.17.1'
+    implementation 'org.jsoup:jsoup:1.16.2'
 
     implementation 'com.google.guava:guava:32.1.1-jre'
 
-    implementation 'org.slf4j:slf4j-api:2.0.9'
+//    implementation 'ch.qos.logback:logback-classic:1.4.13'
+//    implementation 'org.slf4j:slf4j-api:2.0.9'
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
@@ -39,6 +41,12 @@ java {
 application {
     // Define the main class for the application.
     mainClass = 'com.monzo.webcrawler.App'
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': application.mainClass
+    }
 }
 
 tasks.named('test') {

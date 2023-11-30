@@ -28,6 +28,7 @@ public class WebClient {
     }
 
     public String get(URI url) throws WebClientException {
+//        System.out.println("get url " + url);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
                 .timeout(Duration.ofMinutes(2))
@@ -49,8 +50,8 @@ public class WebClient {
 
     private void checkResponseStatus(HttpResponse<String> response) throws HttpStatusException {
         int code = response.statusCode();
-        if(code >= 400 && code <= 499) throw new ClientErrorException(code, response.body());
-        if(code >= 500 && code <= 599) throw new ServerErrorException(code, response.body());
+        if(code >= 400 && code <= 499) throw new ClientErrorException(response);
+        if(code >= 500 && code <= 599) throw new ServerErrorException(response);
         // We should not care about 3xx since it should follow automatically
     }
 
@@ -63,27 +64,34 @@ public class WebClient {
     public static class HttpStatusException extends WebClientException {
         private final int statusCode;
 
-        public HttpStatusException(int statusCode, String statusMessage) {
-            super(statusMessage);
+        private final String url;
+
+        public HttpStatusException(int statusCode, String url) {
+            super("Status code is " + statusCode);
             this.statusCode = statusCode;
+            this.url = url;
         }
 
         public int getStatusCode() {
             return statusCode;
         }
+
+        public String getUrl() {
+            return url;
+        }
     }
 
     public static class ClientErrorException extends HttpStatusException {
 
-        public ClientErrorException(int statusCode, String statusMessage) {
-            super(statusCode, statusMessage);
+        public ClientErrorException(HttpResponse<String> response) {
+            super(response.statusCode(), response.uri().toString());
         }
     }
 
     public static class ServerErrorException extends HttpStatusException {
 
-        public ServerErrorException(int statusCode, String statusMessage) {
-            super(statusCode, statusMessage);
+        public ServerErrorException(HttpResponse<String> response) {
+            super(response.statusCode(), response.uri().toString());
         }
     }
 }
