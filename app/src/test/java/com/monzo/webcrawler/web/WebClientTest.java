@@ -24,7 +24,6 @@ class WebClientTest {
     HttpClient httpClient;
     @Mock
     HttpResponse<String> httpResponse;
-
     @InjectMocks
     WebClient webClient;
 
