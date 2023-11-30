@@ -1,5 +1,8 @@
 package com.monzo.webcrawler.web;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -7,6 +10,8 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 
 public class WebClient {
+
+    private static final Logger log = LoggerFactory.getLogger(WebClient.class);
 
     private static final WebClient WEB_CLIENT = new WebClient();
 
@@ -28,7 +33,7 @@ public class WebClient {
     }
 
     public String get(URI url) throws WebClientException {
-//        System.out.println("get url " + url);
+        log.debug("get url {}", url);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
                 .timeout(Duration.ofMinutes(2))

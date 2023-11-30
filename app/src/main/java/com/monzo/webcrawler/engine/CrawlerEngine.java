@@ -3,6 +3,8 @@ package com.monzo.webcrawler.engine;
 import com.monzo.webcrawler.models.ParseResult;
 import com.monzo.webcrawler.web.WebClient;
 import com.monzo.webcrawler.web.WebParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -16,6 +18,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class CrawlerEngine {
+    private static final Logger log = LoggerFactory.getLogger(CrawlerEngine.class);
     private static final int CONCURRENCY_LEVEL = 20;
     private final Set<String> visitedLinks;
     private final String domain;
@@ -33,7 +36,7 @@ public class CrawlerEngine {
         this.countDownLatch = new CountDownLatch(1);
         this.webClient = webClient;
 
-        ThreadFactory factory = Thread.ofVirtual().factory();
+        ThreadFactory factory = Thread.ofVirtual().name("worker-", 0).factory();
         this.executorService = Executors.newFixedThreadPool(CONCURRENCY_LEVEL, factory);
 
         this.domain = url.getHost();
@@ -42,7 +45,7 @@ public class CrawlerEngine {
     }
 
     public static CrawlerEngine create(String rootUrl) throws MalformedURLException, URISyntaxException {
-        System.out.println("Creating CrawlerService");
+        log.debug("Creating CrawlerService with rootUrl {}", rootUrl);
         return new CrawlerEngine(rootUrl, WebClient.instance());
     }
 
@@ -66,7 +69,9 @@ public class CrawlerEngine {
     }
 
     public void await() throws InterruptedException {
+        log.debug("waiting...");
         countDownLatch.await();
+        log.debug("process completed...");
     }
 
     public void shutdown() {
@@ -82,7 +87,7 @@ public class CrawlerEngine {
         totalUniqueLinks.incrementAndGet();
 
         executorService.submit(new WebParser(webClient, url, this));
-//        System.out.println("Url enqueued " + url);
+        log.debug("Enqueued url {}", url);
     }
 
     private void printResult(ParseResult parseResult) {

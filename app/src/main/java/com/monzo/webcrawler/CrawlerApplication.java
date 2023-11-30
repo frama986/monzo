@@ -1,6 +1,8 @@
 package com.monzo.webcrawler;
 
 import com.monzo.webcrawler.engine.CrawlerEngine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.Console;
@@ -9,6 +11,8 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 
 public class CrawlerApplication {
+
+    private static final Logger log = LoggerFactory.getLogger(CrawlerApplication.class);
 
     private static final String DEFAULT_URL = "https://www.google.com/";
 
@@ -31,7 +35,7 @@ public class CrawlerApplication {
                 return;
             }
             if(input.isBlank()) input = DEFAULT_URL;
-            System.out.println(input);
+            log.debug(input);
 
             try {
                 CrawlerEngine crawlerEngine = CrawlerEngine.create(input);
@@ -51,7 +55,7 @@ public class CrawlerApplication {
             crawlerEngine.await();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            System.out.println("Thread Interrupted");
+            log.error("Thread Interrupted");
         }
     }
 }
