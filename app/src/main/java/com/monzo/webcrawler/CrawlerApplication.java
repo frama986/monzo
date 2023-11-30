@@ -4,11 +4,10 @@ import com.monzo.webcrawler.engine.CrawlerEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.Console;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
+
+import static com.monzo.webcrawler.utils.Console.println;
+import static com.monzo.webcrawler.utils.Console.readLine;
 
 public class CrawlerApplication {
 
@@ -17,21 +16,20 @@ public class CrawlerApplication {
     private static final String DEFAULT_URL = "https://www.google.com/";
 
     public void start() {
-        System.out.println("WebCrawler0.1");
-        System.out.println();
-
-        Console console = System.console();
-
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        println();
+        println("#######__ WebCrawler 0.1 __#######");
+        println();
 
         while(true) {
-            System.out.println();
-            System.out.println("START - Type the initial url (or exit to stop): ");
+            println();
+            println("START - Type the initial url (or exit to stop): ");
 
-            String input = console.readLine();
+            String input = readLine();
 
             if("exit".equalsIgnoreCase(input)) {
-                System.out.println("Goodbye!");
+                println();
+                println("Goodbye!");
+                println();
                 return;
             }
             if(input.isBlank()) input = DEFAULT_URL;
@@ -42,10 +40,10 @@ public class CrawlerApplication {
 
                 wait(crawlerEngine);
 
-                System.out.println("COMPLETED - Task completed!");
+                println("COMPLETED - Task completed!");
 
-            } catch (MalformedURLException | URISyntaxException e) {
-                System.err.println("ERROR - Invalid URL, please try again...");
+            } catch (MalformedURLException e) {
+                println("ERROR - Invalid URL, please try again...");
             }
         }
     }
@@ -54,8 +52,8 @@ public class CrawlerApplication {
         try {
             crawlerEngine.await();
         } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
             log.error("Thread Interrupted");
+            Thread.currentThread().interrupt();
         }
     }
 }

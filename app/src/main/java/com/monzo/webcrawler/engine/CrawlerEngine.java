@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -16,6 +15,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static com.monzo.webcrawler.utils.Console.println;
 
 public class CrawlerEngine {
     private static final Logger log = LoggerFactory.getLogger(CrawlerEngine.class);
@@ -28,43 +29,46 @@ public class CrawlerEngine {
     private final WebClient webClient;
     private final CountDownLatch countDownLatch;
 
-    public CrawlerEngine(String rootUrl, WebClient webClient) throws MalformedURLException, URISyntaxException {
+    CrawlerEngine(String rootUrl, WebClient webClient) throws MalformedURLException {
         URI url = parseAndValidateUrl(rootUrl);
+        ThreadFactory factory = Thread.ofVirtual().name("worker-", 0).factory();
+
+        this.domain = url.getHost();
         this.visitedLinks = new HashSet<>();
         this.totalUniqueLinks = new AtomicInteger();
         this.totalVisitedLinks = new AtomicInteger();
         this.countDownLatch = new CountDownLatch(1);
         this.webClient = webClient;
-
-        ThreadFactory factory = Thread.ofVirtual().name("worker-", 0).factory();
         this.executorService = Executors.newFixedThreadPool(CONCURRENCY_LEVEL, factory);
-
-        this.domain = url.getHost();
 
         enqueue(url);
     }
 
-    public static CrawlerEngine create(String rootUrl) throws MalformedURLException, URISyntaxException {
+    public static CrawlerEngine create(String rootUrl) throws MalformedURLException {
         log.debug("Creating CrawlerService with rootUrl {}", rootUrl);
         return new CrawlerEngine(rootUrl, WebClient.instance());
     }
 
     synchronized public void processResult(ParseResult parseResult) {
-        printResult(parseResult);
+        try {
+            printResult(parseResult);
 
-        if(parseResult.isSuccess()) {
-            parseResult.links().stream()
-                    .filter(l -> domain.equals(l.getHost()) && !visitedLinks.contains(l.toString()))
-                    .forEach(this::enqueue);
+            if (parseResult.isSuccess()) {
+                parseResult.links().stream()
+                        .filter(l -> domain.equals(l.getHost()) && !visitedLinks.contains(l.toString()))
+                        .forEach(this::enqueue);
+            }
         }
+        finally {
+            totalVisitedLinks.incrementAndGet();
 
-        totalVisitedLinks.incrementAndGet();
-        System.out.println("Links found: " + totalUniqueLinks + " -- Visited: " + totalVisitedLinks);
-        System.out.println();
+            println("Links found: %d -- Visited: %d", totalUniqueLinks.intValue(), totalVisitedLinks.intValue());
+            println();
 
-        if(isTerminated()) {
-            countDownLatch.countDown();
-            this.notifyAll();
+            if(isTerminated()) {
+                countDownLatch.countDown();
+                this.notifyAll();
+            }
         }
     }
 
@@ -72,10 +76,6 @@ public class CrawlerEngine {
         log.debug("waiting...");
         countDownLatch.await();
         log.debug("process completed...");
-    }
-
-    public void shutdown() {
-        executorService.shutdown();
     }
 
     public boolean isTerminated() {
@@ -91,18 +91,18 @@ public class CrawlerEngine {
     }
 
     private void printResult(ParseResult parseResult) {
-        System.out.println(" -- " + parseResult.url().toString());
+        println(" -- %s", parseResult.url().toString());
         if(parseResult.isFailure()) {
-            System.out.println("Error to fetch or parse the page: " + parseResult.error());
+            println("Error to fetch or parse the page: %s", parseResult.error());
         }
         else {
-            parseResult.links().forEach(l -> System.out.println("   |-- " + l.toString()));
-            System.out.println("Total links in the page: " + parseResult.links().size());
+            parseResult.links().forEach(l -> println("   |-- %s", l.toString()));
+            println("Total links in the page: %d", parseResult.links().size());
         }
-        System.out.println();
+        println();
     }
 
-    private URI parseAndValidateUrl(String strUrl) throws MalformedURLException, URISyntaxException {
+    private URI parseAndValidateUrl(String strUrl) throws MalformedURLException {
         try {
             URI url = new URI(strUrl).normalize();
             url.toURL();
