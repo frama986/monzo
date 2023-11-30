@@ -33,7 +33,6 @@ public class WebParser implements Runnable {
         } catch (Exception e) {
             handleErrors(e);
         }
-
     }
 
     private Document fetchAndParse() throws WebClient.WebClientException {

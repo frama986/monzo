@@ -116,6 +116,6 @@ public class CrawlerEngine {
 
     private String getDomainName(URI url) {
         String host = url.getHost();
-        return host.startsWith("www.") ? host.substring(4) : host;
+        return (host != null && host.startsWith("www.")) ? host.substring(4) : host;
     }
 }
