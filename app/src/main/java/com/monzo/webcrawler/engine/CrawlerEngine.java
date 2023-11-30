@@ -29,24 +29,27 @@ public class CrawlerEngine {
     private final WebClient webClient;
     private final CountDownLatch countDownLatch;
 
-    CrawlerEngine(String rootUrl, WebClient webClient) throws MalformedURLException {
+    CrawlerEngine(String rootUrl, WebClient webClient, ExecutorService executorService) throws MalformedURLException {
         URI url = parseAndValidateUrl(rootUrl);
-        ThreadFactory factory = Thread.ofVirtual().name("worker-", 0).factory();
 
-        this.domain = url.getHost();
+        this.domain = getDomainName(url);
         this.visitedLinks = new HashSet<>();
         this.totalUniqueLinks = new AtomicInteger();
         this.totalVisitedLinks = new AtomicInteger();
         this.countDownLatch = new CountDownLatch(1);
         this.webClient = webClient;
-        this.executorService = Executors.newFixedThreadPool(CONCURRENCY_LEVEL, factory);
+        this.executorService = executorService;
 
         enqueue(url);
     }
 
     public static CrawlerEngine create(String rootUrl) throws MalformedURLException {
         log.debug("Creating CrawlerService with rootUrl {}", rootUrl);
-        return new CrawlerEngine(rootUrl, WebClient.instance());
+
+        ThreadFactory factory = Thread.ofVirtual().name("worker-", 0).factory();
+
+        return new CrawlerEngine(rootUrl, WebClient.instance(),
+                Executors.newFixedThreadPool(CONCURRENCY_LEVEL, factory));
     }
 
     synchronized public void processResult(ParseResult parseResult) {
@@ -55,7 +58,7 @@ public class CrawlerEngine {
 
             if (parseResult.isSuccess()) {
                 parseResult.links().stream()
-                        .filter(l -> domain.equals(l.getHost()) && !visitedLinks.contains(l.toString()))
+                        .filter(l -> domain.equals(getDomainName(l)) && !visitedLinks.contains(l.toString()))
                         .forEach(this::enqueue);
             }
         }
@@ -110,5 +113,10 @@ public class CrawlerEngine {
         } catch (Exception e) {
             throw new MalformedURLException(e.getMessage());
         }
+    }
+
+    private String getDomainName(URI url) {
+        String host = url.getHost();
+        return host.startsWith("www.") ? host.substring(4) : host;
     }
 }

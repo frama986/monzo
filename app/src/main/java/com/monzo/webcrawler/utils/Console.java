@@ -9,10 +9,10 @@ public class Console {
     }
 
     public static void println(String format, Object ... args) {
-        console.printf(format + "%n", args);
+        System.out.printf(format + "%n", args);
     }
 
     public static void println() {
-        console.printf("%n");
+        System.out.printf("%n");
     }
 }
