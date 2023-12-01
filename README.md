@@ -54,15 +54,16 @@ docker run -it --rm webcrawler
 ```
 
 ## Usage and behaviour
-Once started the application will ask for an initial url.\
-If you don't specify any it will default to `https://www.google.com`.\
+Once started the application will ask for the initial url.\
+If you don't specify anything it will default to `https://www.google.com`.\
 If the protocol is not specified it will use `https` as default.\
-If you type `exit` it will exit.
+If you type `exit` it will terminate the execution.
 
-The application will print the url of each inspected page, followed by the list of all the href it has found in the page.\
-This includes any type of reference, like `mailto:` ones.\
-Then it will inspect only the urls it has not visited yet with the same domain of the initial url.\
-Once the processing is completed it will ask for a new url.
+After the input of the initial url, the application will print the url of each inspected page, 
+followed by the list of all the href it found in the page.\
+This includes any type of reference, including `mailto:`.\
+Then, only the urls with the same domain as the initial url that have not been visited yet, will be inspected.\
+Once the processing is completed, the application will ask for a new  url.
 
 ## Notes and possible improvements
 First of all I used Java because it is the language I'm more comfortable with and I thought it would be a good use case
@@ -76,8 +77,6 @@ the visited URLs.
 To avoid concurrency issues when processing the result of the parsing I used `synchronized` on the method.
 This is creating a bit of a bottleneck and there is the chance that the worker threads are waiting to acquire the lock.
 This could be mitigated by using another ExecutorService and enqueuing the results there and having more granular locks.
-
-There are no metrics or monitoring, for a real production application it would be useful to add them.
 
 The HTTPClient uses the same threads of the ExecutorService (sync requests).
 Here it could be interesting to use two different pools and tune better the concurrency.
@@ -94,3 +93,8 @@ and this can lead to longer processing.
 
 All the configuration is hardcoded, and it would be nice to move it in a property file or environment variable,
 for example the number of concurrent threads.
+
+I tried to cover as much code as possible with the unit tests using Junit and Mockito. It would be nice to add some
+end-to-end tests to cover the entire logic of the application.
+
+There are no metrics or monitoring, for a real production application it would be useful to add them.
