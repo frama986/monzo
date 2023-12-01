@@ -20,7 +20,6 @@ public class CrawlerApplication {
     private static final String DEFAULT_URL = "https://www.google.com/";
 
     private final Console console;
-
     private final CrawlerEngineFactory crawlerEngineFactory;
 
     CrawlerApplication(Console console, CrawlerEngineFactory crawlerEngineFactory) {
