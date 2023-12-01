@@ -10,7 +10,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.net.URI;
-import java.net.http.HttpResponse;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -28,13 +27,11 @@ class WebParserTest {
     URI targetUrl = URI.create("https://monzo.com");
     @Mock
     CrawlerEngine crawlerEngine;
-    @Mock
-    HttpResponse<String> httpResponse;
     @InjectMocks
     WebParser webParser;
 
     @Test
-    void whenThePageContainsAnchors_thenSubmitTheResultWithListOfLinks() throws WebClient.WebClientException {
+    void givenAPageWithOneLink_whenTheWebParserRuns_thenItSubmitsTheResultWithListOfLinks() throws WebClient.WebClientException {
         ParseResult parseResult =
                 new ParseResult(targetUrl,
                         Arrays.asList(URI.create("https://monzo.com"), URI.create("https://www.google.com")));
@@ -44,10 +41,11 @@ class WebParserTest {
         webParser.run();
 
         verify(crawlerEngine).processResult(parseResult);
+        verify(webClient).get(targetUrl);
     }
 
     @Test
-    void whenThePageDoesntContainAnchors_thenSubmitTheResultWithNoLinks() throws WebClient.WebClientException {
+    void givenAPageWithNoLinks_whenTheWebParserRuns_thenItSubmitsTheResultWithNoLinks() throws WebClient.WebClientException {
         ParseResult parseResult = new ParseResult(targetUrl, Collections.emptyList());
 
         when(webClient.get(targetUrl)).thenReturn(PAGE_WITHOUT_LINKS);
@@ -58,7 +56,7 @@ class WebParserTest {
     }
 
     @Test
-    void whenItRaisesAnException_thenSubmitAFailureResult() throws WebClient.WebClientException {
+    void whenAnExceptionIsRaised_thenFailureResultIsSubmitted() throws WebClient.WebClientException {
         ParseResult parseResult = new ParseResult(targetUrl, "Status code is 400");
         WebClient.ClientErrorException clientErrorException = Mockito.mock(WebClient.ClientErrorException.class);
 
