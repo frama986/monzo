@@ -14,8 +14,8 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     implementation 'org.jsoup:jsoup:1.16.2'
-
     implementation 'ch.qos.logback:logback-classic:1.4.13'
+    implementation 'commons-validator:commons-validator:1.7'
 }
 
 java {
