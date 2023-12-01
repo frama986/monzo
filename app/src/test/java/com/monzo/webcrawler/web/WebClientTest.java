@@ -28,7 +28,7 @@ class WebClientTest {
     WebClient webClient;
 
     @Test
-    void whenUrlIsValid_thenReturnsHtml() throws IOException, InterruptedException, WebClient.WebClientException {
+    void whenUrlIsValid_thenItReturnsHtml() throws IOException, InterruptedException, WebClient.WebClientException {
         String htmlPage = "<!DOCTYPE html><html><head></head><body></body></html>";
         URI url = URI.create("https://ww.google.com");
         HttpRequest request = HttpRequest.newBuilder()
@@ -47,7 +47,7 @@ class WebClientTest {
     }
 
     @Test
-    void whenServerReturnA4xxError_thenRaiseAClientErrorException() throws IOException, InterruptedException {
+    void whenServerReturnA4xxError_thenClientErrorExceptionIsRaised() throws IOException, InterruptedException {
         URI url = URI.create("https://ww.google.com");
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
@@ -63,7 +63,7 @@ class WebClientTest {
     }
 
     @Test
-    void whenServerReturnA5xxError_thenRaiseAServerErrorException() throws IOException, InterruptedException {
+    void whenServerReturnA5xxError_thenServerErrorExceptionIsRaised() throws IOException, InterruptedException {
         URI url = URI.create("https://ww.google.com");
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)

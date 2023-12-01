@@ -1,9 +1,10 @@
 package com.monzo.webcrawler;
 
 import com.monzo.webcrawler.core.CrawlerEngine;
+import com.monzo.webcrawler.core.CrawlerEngineFactory;
+import com.monzo.webcrawler.core.EngineObserver;
 import com.monzo.webcrawler.utils.Console;
 import com.monzo.webcrawler.utils.URLFormatter;
-import com.monzo.webcrawler.core.CrawlerEngineFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,8 +52,9 @@ public class CrawlerApplication {
                 Instant startTime = Instant.now();
 
                 CrawlerEngine crawlerEngine = crawlerEngineFactory.engineFrom(uri);
+                EngineObserver observer = crawlerEngine.start();
 
-                wait(crawlerEngine);
+                wait(observer);
 
                 Instant endTime = Instant.now();
                 console.println("COMPLETED - Task completed in %d seconds", Duration.between(startTime, endTime).getSeconds());
@@ -70,9 +72,9 @@ public class CrawlerApplication {
         return URLFormatter.parseAndValidateUrl(input);
     }
 
-    private void wait(CrawlerEngine crawlerEngine) {
+    private void wait(EngineObserver observer) {
         try {
-            crawlerEngine.await();
+            observer.awaitTermination();
         } catch (InterruptedException e) {
             log.error("Thread Interrupted");
             Thread.currentThread().interrupt();
