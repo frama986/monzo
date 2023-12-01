@@ -1,13 +1,16 @@
 package com.monzo.webcrawler;
 
-import com.monzo.webcrawler.engine.CrawlerEngine;
+import com.monzo.webcrawler.core.CrawlerEngine;
+import com.monzo.webcrawler.utils.Console;
+import com.monzo.webcrawler.utils.URLFormatter;
+import com.monzo.webcrawler.web.CrawlerEngineFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.MalformedURLException;
-
-import static com.monzo.webcrawler.utils.Console.println;
-import static com.monzo.webcrawler.utils.Console.readLine;
+import java.net.URI;
+import java.time.Duration;
+import java.time.Instant;
 
 public class CrawlerApplication {
 
@@ -15,47 +18,56 @@ public class CrawlerApplication {
 
     private static final String DEFAULT_URL = "https://www.google.com/";
 
+    private final Console console;
+
+    private final CrawlerEngineFactory crawlerEngineFactory;
+
+    CrawlerApplication(Console console, CrawlerEngineFactory crawlerEngineFactory) {
+        this.console = console;
+        this.crawlerEngineFactory = crawlerEngineFactory;
+    }
+
+    public static CrawlerApplication instance() {
+        return new CrawlerApplication(Console.instance(), new CrawlerEngineFactory());
+    }
+
     public void start() {
-        println();
-        println("#######__ WebCrawler 0.1 __#######");
-        println();
+        titleMessage();
 
         while(true) {
-            println();
-            println("START - Type the initial url (or exit to stop): ");
+            startMessage();
 
-            String input = readLine();
+            String input = console.readLine();
+            log.debug(input);
 
             if("exit".equalsIgnoreCase(input)) {
-                println();
-                println("Goodbye!");
-                println();
+                goodbyeMessage();
                 return;
             }
 
-            input = formatInput(input);
-            log.debug(input);
-
             try {
-                CrawlerEngine crawlerEngine = CrawlerEngine.create(input);
+                URI uri = formatInput(input);
+
+                Instant startTime = Instant.now();
+
+                CrawlerEngine crawlerEngine = crawlerEngineFactory.engineFrom(uri);
 
                 wait(crawlerEngine);
 
-                println("COMPLETED - Task completed!");
+                Instant endTime = Instant.now();
+                console.println("COMPLETED - Task completed in %d seconds", Duration.between(startTime, endTime).getSeconds());
 
             } catch (MalformedURLException e) {
-                println("ERROR - Invalid URL, please try again...");
+                console.println("ERROR - Invalid URL, please try again...");
             }
         }
     }
 
-    private String formatInput(String input) {
-        if(input == null || input.isBlank()) return DEFAULT_URL;
-
-        if (! input.startsWith("http")) {
-            input = "https://" + input;
+    private URI formatInput(String input) throws MalformedURLException {
+        if(input == null || input.isBlank()) {
+            return URI.create(DEFAULT_URL);
         }
-        return input;
+        return URLFormatter.parseAndValidateUrl(input);
     }
 
     private void wait(CrawlerEngine crawlerEngine) {
@@ -65,5 +77,22 @@ public class CrawlerApplication {
             log.error("Thread Interrupted");
             Thread.currentThread().interrupt();
         }
+    }
+
+    private void goodbyeMessage() {
+        console.println();
+        console.println("Goodbye!");
+        console.println();
+    }
+
+    private void startMessage() {
+        console.println();
+        console.println("START - Type the initial url (or exit to stop): ");
+    }
+
+    private void titleMessage() {
+        console.println();
+        console.println("#######__ WebCrawler 0.1 __#######");
+        console.println();
     }
 }

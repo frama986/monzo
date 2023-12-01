@@ -1,6 +1,6 @@
 package com.monzo.webcrawler.web;
 
-import com.monzo.webcrawler.engine.CrawlerEngine;
+import com.monzo.webcrawler.core.CrawlerEngine;
 import com.monzo.webcrawler.models.ParseResult;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -21,6 +21,10 @@ public class WebParser implements Runnable {
         this.webClient = webClient;
         this.targetUrl = targetUrl;
         this.crawlerEngine = crawlerEngine;
+    }
+
+    public WebParser(URI targetUrl, CrawlerEngine crawlerEngine) {
+        this(WebClient.instance(), targetUrl, crawlerEngine);
     }
 
     @Override

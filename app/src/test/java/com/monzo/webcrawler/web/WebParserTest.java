@@ -1,6 +1,6 @@
 package com.monzo.webcrawler.web;
 
-import com.monzo.webcrawler.engine.CrawlerEngine;
+import com.monzo.webcrawler.core.CrawlerEngine;
 import com.monzo.webcrawler.models.ParseResult;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

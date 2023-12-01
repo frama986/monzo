@@ -36,7 +36,7 @@ public class WebClient {
         log.debug("get url {}", url);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(url)
-                .timeout(Duration.ofMinutes(2))
+                .timeout(Duration.ofSeconds(30))
                 .build();
         HttpResponse<String> response = send(request);
         return response.body();
