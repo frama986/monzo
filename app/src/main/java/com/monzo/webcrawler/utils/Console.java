@@ -1,11 +1,12 @@
 package com.monzo.webcrawler.utils;
 
-public class Console {
+import java.util.Scanner;
 
-    public final java.io.Console console;
+public class Console {
+    private final Scanner scanner;
 
     private Console() {
-        console = System.console();
+        scanner = new Scanner(System.in);
     }
 
     public static Console instance() {
@@ -13,7 +14,7 @@ public class Console {
     }
 
     public String readLine() {
-        return console.readLine();
+        return scanner.nextLine();
     }
 
     public void println(String format, Object ... args) {
