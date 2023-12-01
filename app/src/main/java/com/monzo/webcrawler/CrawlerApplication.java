@@ -3,7 +3,7 @@ package com.monzo.webcrawler;
 import com.monzo.webcrawler.core.CrawlerEngine;
 import com.monzo.webcrawler.utils.Console;
 import com.monzo.webcrawler.utils.URLFormatter;
-import com.monzo.webcrawler.web.CrawlerEngineFactory;
+import com.monzo.webcrawler.core.CrawlerEngineFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

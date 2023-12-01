@@ -1,4 +1,4 @@
-package com.monzo.webcrawler.web;
+package com.monzo.webcrawler.core;
 
 import com.monzo.webcrawler.core.CrawlerEngine;
 import com.monzo.webcrawler.core.CrawlerEngineImpl;
