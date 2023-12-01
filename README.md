@@ -17,7 +17,7 @@ We have three main components:
 ## Setup and run the service
 This service requires Java 21 to run.
 
-NOTE: if you don't want to install Java you can build it and run it using Docker, see below.
+NOTE: if you don't want to install Java you can build it and run it using Docker, see [below](#run-the-application-using-docker).
 
 ### Install Java 21
 If you don't have Java already on your machine you can easily install it using [SDKMAN!](https://sdkman.io/). \
