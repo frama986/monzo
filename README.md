@@ -1,9 +1,7 @@
 # Web Crawler
 
-Starting from an initial URL, this web crawler will fetch and print 
-all the links it can find on a webpage. Then it will enqueue to be  
-URLs not visited yet with the same domain as the initial one to be 
-processed.
+Starting from an initial URL, this web crawler will fetch and print all the links it can find in a webpage. 
+Then it will enqueue and process the URLs not already visited and with the same domain as the initial one.
 
 ## Architecture
 
