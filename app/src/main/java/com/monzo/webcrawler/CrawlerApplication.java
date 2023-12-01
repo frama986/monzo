@@ -32,7 +32,8 @@ public class CrawlerApplication {
                 println();
                 return;
             }
-            if(input.isBlank()) input = DEFAULT_URL;
+
+            input = formatInput(input);
             log.debug(input);
 
             try {
@@ -46,6 +47,15 @@ public class CrawlerApplication {
                 println("ERROR - Invalid URL, please try again...");
             }
         }
+    }
+
+    private String formatInput(String input) {
+        if(input == null || input.isBlank()) return DEFAULT_URL;
+
+        if (! input.startsWith("http")) {
+            input = "https://" + input;
+        }
+        return input;
     }
 
     private void wait(CrawlerEngine crawlerEngine) {
